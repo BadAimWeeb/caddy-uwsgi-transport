@@ -33,6 +33,7 @@ func init() {
 }
 
 type Transport struct {
+	UWSGIParams map[string]string `json:"uwsgi_params,omitempty"`
 }
 
 // CaddyModule returns the Caddy module information.
@@ -52,7 +53,7 @@ func writeBlockVar(buffer *bytes.Buffer, s string) {
 }
 
 // generateBlockVars returns the packet body of WSGI block vars generated from http.Request.
-func generateBlockVars(req *http.Request) (*bytes.Buffer, error) {
+func generateBlockVars(req *http.Request, t Transport) (*bytes.Buffer, error) {
 	serverName, serverPort, err := net.SplitHostPort(req.Host)
 	if err != nil {
 		serverName = req.Host
@@ -85,6 +86,10 @@ func generateBlockVars(req *http.Request) (*bytes.Buffer, error) {
 		vars["HTTP_"+headerNameReplacer.Replace(strings.ToUpper(name))] = strings.Join(value, ", ")
 	}
 
+	for name, value := range t.UWSGIParams {
+		vars[name] = value
+	}
+
 	var packetBody bytes.Buffer
 	for key, val := range vars {
 		writeBlockVar(&packetBody, key)
@@ -105,7 +110,7 @@ func (t Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 		return nil, err
 	}
 
-	blockVars, err := generateBlockVars(req)
+	blockVars, err := generateBlockVars(req, t)
 	if err != nil {
 		return nil, err
 	}
