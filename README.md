@@ -10,7 +10,7 @@ By using [`xcaddy`](https://caddyserver.com/docs/build#xcaddy)
 
 ```sh
 xcaddy build \
-    --with github.com/wxh06/caddy-uwsgi-transport
+    --with github.com/BadAimWeeb/caddy-uwsgi-transport
 ```
 
 ## Usage

@@ -1,4 +1,4 @@
-module github.com/wxh06/caddy-uwsgi-transport
+module github.com/BadAimWeeb/caddy-uwsgi-transport
 
 go 1.20
 
