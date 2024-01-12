@@ -131,11 +131,29 @@ func (t Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 // UnmarshalCaddyfile implements caddyfile.Unmarshaler.
 func (t *Transport) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
 	for d.Next() {
-		if d.NextArg() {
-			// too many args
-			return d.ArgErr()
+		if !d.NextArg() {
+			return nil
+		}
+
+		if d.Val() == "uwsgi_param" {
+			if !d.NextArg() {
+				return d.ArgErr()
+			}
+
+			key := d.Val()
+
+			if !d.NextArg() {
+				return d.ArgErr()
+			}
+
+			value := d.Val()
+
+			t.UWSGIParams[key] = value
+		} else {
+			return d.Errf("unknown subdirective %s", d.Val())
 		}
 	}
+
 	return nil
 }
 
