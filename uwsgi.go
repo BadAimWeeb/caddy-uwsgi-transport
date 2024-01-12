@@ -66,17 +66,28 @@ func generateBlockVars(req *http.Request, t Transport) (*bytes.Buffer, error) {
 		}
 	}
 
+	httpsConn := ""
+	if req.TLS != nil {
+		httpsConn = "on"
+	}
+
 	vars := map[string]string{
-		"REQUEST_METHOD":  req.Method,
-		"SCRIPT_NAME":     "",
-		"PATH_INFO":       req.URL.Path,
 		"QUERY_STRING":    req.URL.RawQuery,
+		"REQUEST_METHOD":  req.Method,
 		"CONTENT_TYPE":    req.Header.Get("Content-Type"),
 		"CONTENT_LENGTH":  req.Header.Get("Content-Length"),
-		"SERVER_NAME":     serverName,
-		"SERVER_PORT":     serverPort,
+
+		"REQUEST_URI":     req.RequestURI,
+		"PATH_INFO":       req.URL.Path,
 		"SERVER_PROTOCOL": req.Proto,
-		"REMOTE_ADDR":     req.RemoteAddr,
+		"REQUEST_SCHEME":  req.URL.Scheme,
+		"HTTPS":		   httpsConn,
+		
+		"REMOTE_ADDR":     strings.Split(req.RemoteAddr, ":")[0],
+		"REMOTE_PORT":     strings.Split(req.RemoteAddr, ":")[1],
+		"SERVER_PORT":     serverPort,
+		"SERVER_NAME":     serverName,
+
 		"HTTP_HOST":       req.Host,
 	}
 	if req.TLS != nil {
@@ -156,6 +167,8 @@ func (t *Transport) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
 
 	return nil
 }
+
+func (t *Transport) 
 
 var (
 	_ http.RoundTripper     = (*Transport)(nil)
