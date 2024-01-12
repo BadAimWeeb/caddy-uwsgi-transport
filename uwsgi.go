@@ -72,23 +72,23 @@ func generateBlockVars(req *http.Request, t Transport) (*bytes.Buffer, error) {
 	}
 
 	vars := map[string]string{
-		"QUERY_STRING":    req.URL.RawQuery,
-		"REQUEST_METHOD":  req.Method,
-		"CONTENT_TYPE":    req.Header.Get("Content-Type"),
-		"CONTENT_LENGTH":  req.Header.Get("Content-Length"),
+		"QUERY_STRING":   req.URL.RawQuery,
+		"REQUEST_METHOD": req.Method,
+		"CONTENT_TYPE":   req.Header.Get("Content-Type"),
+		"CONTENT_LENGTH": req.Header.Get("Content-Length"),
 
 		"REQUEST_URI":     req.RequestURI,
 		"PATH_INFO":       req.URL.Path,
 		"SERVER_PROTOCOL": req.Proto,
 		"REQUEST_SCHEME":  req.URL.Scheme,
-		"HTTPS":		   httpsConn,
-		
-		"REMOTE_ADDR":     strings.Split(req.RemoteAddr, ":")[0],
-		"REMOTE_PORT":     strings.Split(req.RemoteAddr, ":")[1],
-		"SERVER_PORT":     serverPort,
-		"SERVER_NAME":     serverName,
+		"HTTPS":           httpsConn,
 
-		"HTTP_HOST":       req.Host,
+		"REMOTE_ADDR": strings.Split(req.RemoteAddr, ":")[0],
+		"REMOTE_PORT": strings.Split(req.RemoteAddr, ":")[1],
+		"SERVER_PORT": serverPort,
+		"SERVER_NAME": serverName,
+
+		"HTTP_HOST": req.Host,
 	}
 	if req.TLS != nil {
 		vars["HTTPS"] = "on"
@@ -167,8 +167,6 @@ func (t *Transport) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
 
 	return nil
 }
-
-func (t *Transport) 
 
 var (
 	_ http.RoundTripper     = (*Transport)(nil)
