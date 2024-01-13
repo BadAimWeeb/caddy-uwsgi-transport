@@ -1,3 +1,4 @@
+// Copyright (C) 2024 BadAimWeeb
 // Copyright 2023 Xinhe Wang
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,7 +19,6 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/binary"
-	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -78,6 +78,12 @@ func generateBlockVars(req *http.Request, t Transport) (*bytes.Buffer, error) {
 
 	remoteAddrSplit := strings.Split(req.RemoteAddr, ":")
 
+	remoteAddr := strings.Join(remoteAddrSplit[:len(remoteAddrSplit)-1], ":")
+	if remoteAddr[0] == '[' && remoteAddr[len(remoteAddr)-1] == ']' {
+		// special case for IPv6 addresses
+		remoteAddr = remoteAddr[1 : len(remoteAddr)-1]
+	}
+
 	vars := map[string]string{
 		"QUERY_STRING":   req.URL.RawQuery,
 		"REQUEST_METHOD": req.Method,
@@ -90,30 +96,28 @@ func generateBlockVars(req *http.Request, t Transport) (*bytes.Buffer, error) {
 		"REQUEST_SCHEME":  req.URL.Scheme,
 		"HTTPS":           httpsConn,
 
-		"REMOTE_ADDR": strings.Join(remoteAddrSplit[:len(remoteAddrSplit)-1], ":"),
+		"REMOTE_ADDR": remoteAddr,
 		"REMOTE_PORT": remoteAddrSplit[len(remoteAddrSplit)-1],
 		"SERVER_PORT": serverPort,
 		"SERVER_NAME": serverName,
 
 		"HTTP_HOST": req.Host,
 	}
+
 	if req.TLS != nil {
 		vars["HTTPS"] = "on"
 	}
+
 	for name, value := range req.Header {
 		vars["HTTP_"+headerNameReplacer.Replace(strings.ToUpper(name))] = strings.Join(value, ", ")
 	}
 
 	for name, value := range t.UWSGIParams {
-		// debug log
-		fmt.Println("uwsgi param override:", name, value)
 		vars[name] = value
 	}
 
 	var packetBody bytes.Buffer
 	for key, val := range vars {
-		fmt.Println("uwsgi final param:", key, val)
-
 		writeBlockVar(&packetBody, key)
 		writeBlockVar(&packetBody, val)
 	}

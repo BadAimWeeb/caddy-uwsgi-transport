@@ -19,7 +19,9 @@ xcaddy build \
 
 ```caddyfile
 reverse_proxy [<matcher>] [<upstreams...>] {
-	transport uwsgi
+	transport uwsgi {
+    uwsgi_param <key> <value> # in case you need to set uwsgi params (for example UWSGI_SCRIPT)
+  }
 }
 ```
 
@@ -36,7 +38,12 @@ reverse_proxy [<matcher>] [<upstreams...>] {
               "handle": [
                 {
                   "handler": "reverse_proxy",
-                  "transport": { "protocol": "uwsgi" },
+                  "transport": {
+                    "protocol": "uwsgi",
+                    "uwsgi_params": {
+                      "<key>": "<value>"
+                    }
+                  },
                   "upstreams": [{ "dial": "<upstream>" }]
                 }
               ]
@@ -48,3 +55,9 @@ reverse_proxy [<matcher>] [<upstreams...>] {
   }
 }
 ```
+
+## Copyright
+
+This module is licensed under the [Apache 2.0 License](LICENSE).
+
+Copyright ©️ 2024 BadAimWeeb.<br />Original author copyright ©️ 2023 Xinhe Wang.
