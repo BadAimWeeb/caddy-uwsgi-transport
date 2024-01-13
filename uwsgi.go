@@ -72,6 +72,8 @@ func generateBlockVars(req *http.Request, t Transport) (*bytes.Buffer, error) {
 		httpsConn = "on"
 	}
 
+	remoteAddrSplit := strings.Split(req.RemoteAddr, ":")
+
 	vars := map[string]string{
 		"QUERY_STRING":   req.URL.RawQuery,
 		"REQUEST_METHOD": req.Method,
@@ -84,8 +86,8 @@ func generateBlockVars(req *http.Request, t Transport) (*bytes.Buffer, error) {
 		"REQUEST_SCHEME":  req.URL.Scheme,
 		"HTTPS":           httpsConn,
 
-		"REMOTE_ADDR": strings.Split(req.RemoteAddr, ":")[0],
-		"REMOTE_PORT": strings.Split(req.RemoteAddr, ":")[1],
+		"REMOTE_ADDR": strings.Join(remoteAddrSplit[:len(remoteAddrSplit)-1], ":"),
+		"REMOTE_PORT": remoteAddrSplit[len(remoteAddrSplit)-1],
 		"SERVER_PORT": serverPort,
 		"SERVER_NAME": serverName,
 
@@ -147,26 +149,23 @@ func (t Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 // UnmarshalCaddyfile implements caddyfile.Unmarshaler.
 func (t *Transport) UnmarshalCaddyfile(d *caddyfile.Dispenser) error {
 	for d.Next() {
-		if !d.NextArg() {
-			return nil
-		}
+		for nesting := d.Nesting(); d.NextBlock(nesting); {
+			switch d.Val() {
+			case "uwsgi_param":
+				if !d.NextArg() {
+					return d.ArgErr()
+				}
+				key := d.Val()
 
-		if d.Val() == "uwsgi_param" {
-			if !d.NextArg() {
-				return d.ArgErr()
+				if !d.NextArg() {
+					return d.ArgErr()
+				}
+				value := d.Val()
+
+				t.UWSGIParams[key] = value
+			default:
+				return d.Errf("unknown subdirective %s", d.Val())
 			}
-
-			key := d.Val()
-
-			if !d.NextArg() {
-				return d.ArgErr()
-			}
-
-			value := d.Val()
-
-			t.UWSGIParams[key] = value
-		} else {
-			return d.Errf("unknown subdirective %s", d.Val())
 		}
 	}
 
