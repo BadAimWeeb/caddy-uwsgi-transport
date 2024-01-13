@@ -33,7 +33,22 @@ func init() {
 	caddy.RegisterModule(Transport{})
 }
 
+// The uwsgi transport module allows you to proxy requests to an uWSGI server with uwsgi protocol.
+//
+// Caddyfile syntax is also supported:
+//
+// ```caddyfile
+//
+//	reverse_proxy [<matcher>] [<upstreams...>] {
+//	  transport uwsgi {
+//	    uwsgi_param <key> <value> # in case you need to set uwsgi params (for example UWSGI_SCRIPT)
+//	  }
+//	}
+//
+// ```
 type Transport struct {
+	// UWSGIParams is a map of static uwsgi params to be passed to uWSGI server.
+	// This is useful for example, setting UWSGI_SCRIPT (uWSGI may require this for some request) and many other params.
 	UWSGIParams map[string]string `json:"uwsgi_params,omitempty"`
 }
 
