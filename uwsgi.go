@@ -40,8 +40,12 @@ type Transport struct {
 // CaddyModule returns the Caddy module information.
 func (Transport) CaddyModule() caddy.ModuleInfo {
 	return caddy.ModuleInfo{
-		ID:  "http.reverse_proxy.transport.uwsgi",
-		New: func() caddy.Module { return new(Transport) },
+		ID: "http.reverse_proxy.transport.uwsgi",
+		New: func() caddy.Module {
+			return &Transport{
+				UWSGIParams: make(map[string]string),
+			}
+		},
 	}
 }
 
