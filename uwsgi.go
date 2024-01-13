@@ -18,6 +18,7 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/binary"
+	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -98,11 +99,15 @@ func generateBlockVars(req *http.Request, t Transport) (*bytes.Buffer, error) {
 	}
 
 	for name, value := range t.UWSGIParams {
+		// debug log
+		fmt.Println("uwsgi param override:", name, value)
 		vars[name] = value
 	}
 
 	var packetBody bytes.Buffer
 	for key, val := range vars {
+		fmt.Println("uwsgi final param:", key, val)
+
 		writeBlockVar(&packetBody, key)
 		writeBlockVar(&packetBody, val)
 	}
