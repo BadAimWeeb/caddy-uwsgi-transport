@@ -38,7 +38,7 @@ jobs:
         run: pip install --upgrade -r test/requirements.txt
 
       - name: Build
-        run: xcaddy build --with github.com/wxh06/caddy-uwsgi-transport=.
+        run: xcaddy build --with github.com/BadAimWeeb/caddy-uwsgi-transport=.
 
       - name: Test
         run: timeout 1m ./test/test.sh
